@@ -83,6 +83,7 @@ async function insertDemotable(event) {
     event.preventDefault();
 
     const idValue = document.getElementById('insertId').value;
+    const addressValue = document.getElementById('insertAddress').value;
     const nameValue = document.getElementById('insertName').value;
 
     const response = await fetch('/insert-demotable', {
@@ -92,7 +93,9 @@ async function insertDemotable(event) {
         },
         body: JSON.stringify({
             id: idValue,
+            address: addressValue,
             name: nameValue
+
         })
     });
 
