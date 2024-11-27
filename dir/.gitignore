@@ -11,6 +11,8 @@ node_modules/
 .vscode/
 .idea/
 
+local-start.sh
+
 # Mac files
 .DS_Store
 
