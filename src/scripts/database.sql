@@ -101,6 +101,7 @@ CREATE TABLE StatusQuantity (
 CREATE TABLE DonationReceipt (
     ReceiptNum INT PRIMARY KEY,
     DonorID INT NOT NULL,
+    Amount INT NOT NULL,
     FOREIGN KEY (DonorID) REFERENCES FoodDonors(DonorID)
 );
 
@@ -224,11 +225,11 @@ INSERT INTO FoodDonors (DonorID, Name, Type, ReceiptNum) VALUES (3, 'Jane Smith'
 INSERT INTO FoodDonors (DonorID, Name, Type, ReceiptNum) VALUES (4, 'Charity Group A', 'Organization', 4);
 INSERT INTO FoodDonors (DonorID, Name, Type, ReceiptNum) VALUES (5, 'Local Market', 'Business', 5);
 
-INSERT INTO DonationReceipt (ReceiptNum, DonorID) VALUES (1, 1);
-INSERT INTO DonationReceipt (ReceiptNum, DonorID) VALUES (2, 2);
-INSERT INTO DonationReceipt (ReceiptNum, DonorID) VALUES (3, 3);
-INSERT INTO DonationReceipt (ReceiptNum, DonorID) VALUES (4, 4);
-INSERT INTO DonationReceipt (ReceiptNum, DonorID) VALUES (5, 5);
+INSERT INTO DonationReceipt (ReceiptNum, DonorID, Amount) VALUES (1, 1, 400);
+INSERT INTO DonationReceipt (ReceiptNum, DonorID, Amount) VALUES (2, 2, 500);
+INSERT INTO DonationReceipt (ReceiptNum, DonorID, Amount) VALUES (3, 3, 200);
+INSERT INTO DonationReceipt (ReceiptNum, DonorID, Amount) VALUES (4, 4, 300);
+INSERT INTO DonationReceipt (ReceiptNum, DonorID, Amount) VALUES (5, 5, 100);
 
 INSERT INTO DonorDate (DonorID, DonationDate) VALUES (1, TO_DATE('2024-10-01', 'YYYY-MM-DD'));
 INSERT INTO DonorDate (DonorID, DonationDate) VALUES (2, TO_DATE('2024-11-01', 'YYYY-MM-DD'));
