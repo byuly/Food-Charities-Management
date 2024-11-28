@@ -1,6 +1,7 @@
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
-
+const fs = require("fs").promises;
+const path = require("path");
 const envVariables = loadEnvFile('./.env');
 
 // Database configuration setup. Ensure your .env file has the required database credentials.
@@ -85,24 +86,48 @@ async function fetchDemotableFromDb() {
     });
 }
 
+async function dropAllTables(connection) {
+    const tables = await connection.execute(
+        `SELECT table_name FROM user_tables`
+    );
+
+    for (const row of tables.rows) {
+        const tableName = row[0];
+        try {
+            console.log(`Dropping table: ${tableName}`);
+            await connection.execute(`DROP TABLE ${tableName} CASCADE CONSTRAINTS`);
+        } catch (err) {
+            console.error(`Failed to drop table ${tableName}:`, err);
+        }
+    }
+}
+
 async function initiateDemotable() {
     return await withOracleDB(async (connection) => {
-        try {
-            await connection.execute(`DROP TABLE Charities`);
-        } catch(err) {
-            console.log('Table might not exist, proceeding to create...');
-        }
+        // Step 1: Drop all tables
+        await dropAllTables(connection);
 
-        const result = await connection.execute(`
-            CREATE TABLE Charities (
-             CharityID INTEGER PRIMARY KEY,
-             Address VARCHAR(255) NOT NULL,
-             Name VARCHAR(100) NOT NULL,
-             UNIQUE (Address)
-            )
-        `);
-        return true;
-    }).catch(() => {
+        // Step 2: Read SQL script file
+        try {
+            const sqlFilePath = path.join(__dirname, "/scripts/database.sql"); // Replace with your SQL file path
+            const sqlScript = await fs.readFile(sqlFilePath, "utf8");
+
+            // Split the SQL script into individual statements
+            const sqlStatements = sqlScript.split(";").map(stmt => stmt.trim()).filter(stmt => stmt);
+
+            // Execute each statement
+            for (const statement of sqlStatements) {
+                await connection.execute(statement);
+            }
+
+            console.log("Tables created successfully.");
+            return true;
+        } catch (err) {
+            console.error("Error executing SQL script:", err);
+            return false;
+        }
+    }).catch((err) => {
+        console.error("Database operation failed:", err);
         return false;
     });
 }
