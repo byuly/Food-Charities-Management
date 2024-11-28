@@ -82,7 +82,6 @@ CREATE TABLE Inventory (
     FOREIGN KEY (FoodID) REFERENCES Food(FoodID)
 );
 
--- FoodDonors table
 CREATE TABLE FoodDonors (
     DonorID INT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
@@ -91,13 +90,11 @@ CREATE TABLE FoodDonors (
     --FOREIGN KEY (ReceiptNum) REFERENCES DonationReceipt(ReceiptNum) circular dependency?
 );
 
--- StatusQuantity table
 CREATE TABLE StatusQuantity (
     Status VARCHAR(50) PRIMARY KEY,
     Quantity INT NOT NULL
 );
 
--- DonationReceipt table
 CREATE TABLE DonationReceipt (
     ReceiptNum INT PRIMARY KEY,
     DonorID INT NOT NULL,
@@ -105,19 +102,17 @@ CREATE TABLE DonationReceipt (
     FOREIGN KEY (DonorID) REFERENCES FoodDonors(DonorID)
 );
 
--- DonorDate table
 CREATE TABLE DonorDate (
     DonorID INT PRIMARY KEY,
     DonationDate DATE NOT NULL
 );
--- General Worker Information Table
+
 CREATE TABLE WorkerInfo (
     PhoneNumber VARCHAR(15) NOT NULL,
     Name VARCHAR(100) NOT NULL,
     PRIMARY KEY (PhoneNumber)
 );
 
--- Charity Worker Details (relationship with charity)
 CREATE TABLE CharityWorkerDetails (
     PhoneNumber VARCHAR(15) NOT NULL,
     CharityID INT NOT NULL,
@@ -128,7 +123,6 @@ CREATE TABLE CharityWorkerDetails (
     FOREIGN KEY (CharityID) REFERENCES Charities(CharityID)
 );
 
--- Staff table for workers who are staff members
 CREATE TABLE Staff (
     PhoneNumber VARCHAR(15) PRIMARY KEY,
     AdminCode VARCHAR(10),
@@ -137,7 +131,6 @@ CREATE TABLE Staff (
     --CHECK (PhoneNumber NOT IN (SELECT PhoneNumber FROM Volunteers))
 );
 
--- Volunteers table for workers who are volunteers
 CREATE TABLE Volunteers (
     PhoneNumber VARCHAR(15) PRIMARY KEY,
     VolunteerHours INT NOT NULL,
