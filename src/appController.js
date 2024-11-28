@@ -65,4 +65,19 @@ router.get('/count-demotable', async (req, res) => {
 });
 
 
+router.post("/insert-recipient", async (req, res) => {
+    const { SinNum, EventID, Age, ContactNum, Gender } = req.body;
+    try {
+        const insertResult = await appService.insertRecipient(SinNum, EventID, Age, ContactNum, Gender);
+        if (insertResult) {
+            res.json({ success: true });
+        } else {
+            res.status(500).json({ success: false, message: "Failed to insert recipient" });
+        }
+    } catch (error) {
+        console.error("Error in /insert-recipient:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
 module.exports = router;

@@ -78,12 +78,16 @@ async function testOracleConnection() {
 }
 
 async function fetchDemotableFromDb() {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute('SELECT * FROM Charities');
-        return result.rows;
-    }).catch(() => {
+    try {
+        const result = await withOracleDB(async (connection) => {
+            const result = await connection.execute('SELECT * FROM Charities');
+            return result.rows;
+        });
+        return result || [];
+    } catch (error) {
+        console.error("Error fetching data from DB:", error);
         return [];
-    });
+    }
 }
 
 async function dropAllTables(connection) {
@@ -104,22 +108,21 @@ async function dropAllTables(connection) {
 
 async function initiateDemotable() {
     return await withOracleDB(async (connection) => {
-        // Step 1: Drop all tables
         await dropAllTables(connection);
-
-        // Step 2: Read SQL script file
         try {
-            const sqlFilePath = path.join(__dirname, "/scripts/database.sql"); // Replace with your SQL file path
+            const sqlFilePath = path.join(__dirname, "/scripts/database.sql");
             const sqlScript = await fs.readFile(sqlFilePath, "utf8");
 
-            // Split the SQL script into individual statements
             const sqlStatements = sqlScript.split(";").map(stmt => stmt.trim()).filter(stmt => stmt);
 
-            // Execute each statement
             for (const statement of sqlStatements) {
-                await connection.execute(statement);
+                try {
+                    console.log(`Executing statement: ${statement}`);
+                    await connection.execute(statement, [], { autoCommit: true });
+                } catch (stmtError) {
+                    console.error(`Failed to execute statement: ${statement}`, stmtError);
+                }
             }
-
             console.log("Tables created successfully.");
             return true;
         } catch (err) {
@@ -131,6 +134,7 @@ async function initiateDemotable() {
         return false;
     });
 }
+
 
 async function insertDemotable(CharityID, Address, Name) {
     return await withOracleDB(async (connection) => {
@@ -169,11 +173,33 @@ async function countDemotable() {
     });
 }
 
+async function insertRecipient(SinNum, EventID, Age, ContactNum, Gender) {
+    return await withOracleDB(async (connection) => {
+        try {
+            const result = await connection.execute(
+                `INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender)
+                 VALUES (:SinNum, :EventID, :Age, :ContactNum, :Gender)`,
+                [SinNum, EventID, Age, ContactNum, Gender],
+                { autoCommit: true }
+            );
+
+            return result.rowsAffected && result.rowsAffected > 0; // Check if the row was inserted
+        } catch (error) {
+            console.error("Error executing insertRecipient:", error);
+            return false; // Return false on error
+        }
+    }).catch((err) => {
+        console.error("Database connection error:", err);
+        return false;
+    });
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
-    initiateDemotable, 
-    insertDemotable, 
-    updateNameDemotable, 
-    countDemotable
+    initiateDemotable,
+    insertDemotable,
+    updateNameDemotable,
+    countDemotable,
+    insertRecipient
 };

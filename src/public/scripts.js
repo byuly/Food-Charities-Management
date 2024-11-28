@@ -170,8 +170,55 @@ window.onload = function() {
     document.getElementById("countDemotable").addEventListener("click", countDemotable);
 };
 
-// General function to refresh the displayed table data. 
+// General function to refresh the displayed table data.
 // You can invoke this after any table-modifying operation to keep consistency.
 function fetchTableData() {
     fetchAndDisplayUsers();
 }
+
+async function insertRecipient(event) {
+    event.preventDefault(); // Prevent the default form submission
+    const sinNumber = document.getElementById('sinNumber').value;
+    const eventId = document.getElementById('eventId').value;
+    const age = document.getElementById('age').value;
+    const contactNumber = document.getElementById('contactNumber').value;
+    const gender = document.getElementById('gender').value;
+    try {
+        const response = await fetch('/insert-recipient', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                SinNum: sinNumber,
+                EventID: parseInt(eventId),
+                Age: parseInt(age),
+                ContactNum: contactNumber,
+                Gender: gender || null // Handle optional gender
+            })
+        });
+
+        const responseData = await response.json();
+        const messageElement = document.getElementById('insertResultMsg');
+
+        if (responseData.success) {
+            messageElement.textContent = "Recipient inserted successfully!";
+        } else {
+            if (responseDataBody.includes("Error: ORA-02291: integrity constraint") && responseDataBody.includes("violated - parent key not found")) {
+                                        messageElement.textContent = "Error inserting data! Please input a Judge License Number listed in the judge table.";
+                                    } else if (responseDataBody.includes("Error: ORA-00001: unique constraint")) {
+                                        messageElement.textContent = "Error inserting data! Please input a unique Case Number not used in the table.";
+                                    } else if (responseDataBody.includes("Error: Forbidden words in request")) {
+                                        messageElement.textContent = "Error inserting data! Please remove the forbidden words.";
+                                    } else {
+                                        messageElement.textContent = "Error inserting data!";
+                                    }
+                }
+
+    } catch (error) {
+        if (responseDataBody.includes("Error: ORA-02291: integrity constraint") && responseDataBody.includes("violated - parent key not found")) {
+
+    }
+    document.getElementById('insertRecipientForm').reset();
+}
+document.getElementById('insertRecipientForm').addEventListener('submit', insertRecipient);
