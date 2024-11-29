@@ -202,7 +202,79 @@ async function fetchRecipients() {
     }
 }
 
+async function updateRecipients(SinNum, EventID, Age, ContactNum, Gender) {
+    return await withOracleDB(async (connection) => {
+        const updateFields = [];
+        const bindParams = { SinNum };
+        if (EventID !== null && EventID !== undefined) {
+            updateFields.push('EventID = :EventID');
+            bindParams.EventID = EventID;
+        }
+        if (Age !== null && Age !== undefined) {
+            updateFields.push('Age = :Age');
+            bindParams.Age = Age;
+        }
+        if (ContactNum !== null && ContactNum !== undefined) {
+            updateFields.push('ContactNum = :ContactNum');
+            bindParams.ContactNum = ContactNum;
+        }
+        if (Gender !== null && Gender !== undefined) {
+            updateFields.push('Gender = :Gender');
+            bindParams.Gender = Gender;
+        }
 
+        if (updateFields.length === 0) {
+            return false;
+        }
+
+        const sqlQuery = `
+            UPDATE Recipients
+            SET ${updateFields.join(', ')}
+            WHERE SinNum = :SinNum
+        `;
+
+        const result = await connection.execute(
+            sqlQuery,
+            bindParams,
+            { autoCommit: true }
+        );
+
+        return result.rowsAffected && result.rowsAffected > 0;
+    }).catch((error) => {
+        console.error('Update error:', error);
+        throw error;
+    });
+}
+
+async function getRecipientsForFood(foodID) {
+    return await withOracleDB(async (connection) => {
+        const result = await connection.execute(
+            `SELECT
+                FR.SinNum,
+                R.ContactNum
+            FROM
+                FoodReceived FR
+            JOIN
+                Recipients R ON FR.SinNum = R.SinNum
+            WHERE
+                FR.FoodID = :foodID`,
+            { foodID },
+            {
+                outFormat: connection.OBJECT, // we want javascript object
+                // we want mapping for the column names!!
+                converters: {
+                    SINNUM: (value) => value,
+                    CONTACTNUM: (value) => value
+                }
+            }
+        );
+        // we need to extract nested array to display on frontend
+        return result.rows.map(row => ({
+            SinNum: row[0],
+            ContactNum: row[1]
+        }));
+    });
+}
 
 module.exports = {
     testOracleConnection,
@@ -212,5 +284,7 @@ module.exports = {
     updateNameDemotable,
     countDemotable,
     insertRecipient,
-    fetchRecipients
+    fetchRecipients,
+    updateRecipients,
+    getRecipientsForFood
 };

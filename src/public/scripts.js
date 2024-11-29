@@ -169,6 +169,8 @@ window.onload = function() {
     document.getElementById("updateNameDemotable").addEventListener("submit", updateNameDemotable);
     document.getElementById("countDemotable").addEventListener("click", countDemotable);
     document.getElementById('insertRecipientForm').addEventListener('submit', insertRecipient);
+    document.getElementById('updateRecipient').addEventListener('submit', updateRecipients);
+    document.getElementById('foodRecipientsForm').addEventListener('submit', fetchFoodRecipients);
 };
 
 // General function to refresh the displayed table data.
@@ -203,7 +205,9 @@ async function insertRecipient(event) {
 
 async function fetchAndDisplayRecipients() {
     const tableElement = document.getElementById('recipienttable');
+    const tableElement2 = document.getElementById('recipienttable2');
     const tableBody = document.getElementById("recipients-body");
+    const tableBody2 = document.getElementById("recipients-body2");
 
     const response = await fetch('/recipients', {
         method: 'GET'
@@ -215,6 +219,9 @@ async function fetchAndDisplayRecipients() {
     if (tableBody) {
         tableBody.innerHTML = '';
     }
+    if (tableBody2) {
+            tableBody2.innerHTML = '';
+        }
 
     recipientContent.forEach(user => {
         const row = tableBody.insertRow();
@@ -223,6 +230,106 @@ async function fetchAndDisplayRecipients() {
             cell.textContent = field;
         });
     });
+
+    recipientContent.forEach(user => {
+            const row = tableBody2.insertRow();
+            user.forEach((field, index) => {
+                const cell = row.insertCell(index);
+                cell.textContent = field;
+            });
+        });
 }
+
+async function updateRecipients(event) {
+    event.preventDefault();
+    const SinNum = document.getElementById('updateSinNum').value;
+    const EventID = document.getElementById('updateEventID').value || null;
+    const Age = document.getElementById('updateAge').value || null;
+    const ContactNum = document.getElementById('updateContactNum').value || null;
+    const Gender = document.getElementById('updateGender').value || null;
+
+    try {
+        const response = await fetch('/update-recipients', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                SinNum,
+                EventID,
+                Age: Age ? parseInt(Age) : null,
+                ContactNum,
+                Gender
+            })
+        });
+
+        const responseData = await response.json();
+        const messageElement = document.getElementById('updateRecipientResultMsg');
+
+        if (responseData.success) {
+            messageElement.textContent = "Recipient updated successfully!";
+            messageElement.style.color = 'green';
+            fetchTableData();
+        } else {
+            messageElement.textContent = `Error updating recipient: ${responseData.message || 'Unknown error'}`;
+            messageElement.style.color = 'red';
+        }
+    } catch (error) {
+        const messageElement = document.getElementById('updateRecipientResultMsg');
+        messageElement.textContent = `Network error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
+
+// JOIN!!!!
+async function fetchFoodRecipients(event) {
+    event.preventDefault();
+
+    const foodID = document.getElementById('foodIDInput').value;
+
+    const messageElement = document.getElementById('foodRecipientsMessage');
+    const tableBody = document.getElementById('recipientsTableBody');
+
+    try {
+        tableBody.innerHTML = '';
+        messageElement.textContent = '';
+
+        const response = await fetch(`/recipients-for-food/${foodID}`);
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const recipients = await response.json();
+        console.log('Received recipients:', recipients); // Add logging
+
+        if (!recipients || recipients.length === 0) {
+            messageElement.textContent = `No recipients found for Food ID ${foodID}`;
+            messageElement.style.color = 'orange';
+            return;
+        }
+
+        recipients.forEach(recipient => {
+            const row = tableBody.insertRow();
+            const sinCell = row.insertCell(0);
+            const contactCell = row.insertCell(1);
+
+            sinCell.textContent = recipient.SINNUM || recipient.SinNum;
+            contactCell.textContent = recipient.CONTACTNUM || recipient.ContactNum;
+        });
+
+        messageElement.textContent = `Found ${recipients.length} recipients for Food ID ${foodID}`;
+        messageElement.style.color = 'green';
+
+    } catch (error) {
+        console.error('Full error:', error);
+        messageElement.textContent = `Error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
+
 
 

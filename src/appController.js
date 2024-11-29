@@ -87,5 +87,47 @@ router.get('/recipients', async (req, res) => {
     res.json({data: tableContent});
 });
 
+router.post("/update-recipients", async (req, res) => {
+    try {
+        console.log('Received data:', req.body);
+        const { SinNum, EventID, Age, ContactNum, Gender } = req.body;
+        if (!SinNum) {
+            return res.status(400).json({
+                success: false,
+                message: "SinNum is required for updating a recipient"
+            });
+        }
+        const updateResult = await appService.updateRecipients(SinNum, EventID, Age, ContactNum, Gender);
+        if (updateResult) {
+            res.json({ success: true });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "Update failed"
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+router.get("/recipients-for-food/:foodID", async (req, res) => {
+    try {
+        console.log('Received Food ID:', req.params.foodID); // Log parameterss
+        const foodID = parseInt(req.params.foodID);
+        const recipients = await appService.getRecipientsForFood(foodID);
+        console.log('Recipients found:', recipients);
+        res.json(recipients);
+    } catch (error) {
+        console.error('Error in route:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
 
 module.exports = router;

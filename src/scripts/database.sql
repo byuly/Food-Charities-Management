@@ -205,6 +205,8 @@ INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender) VALUES ('98765
 INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender) VALUES ('112233445', 3, 29, '555-1122', 'Male');
 INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender) VALUES ('223344556', 4, 60, '555-2233', 'Female');
 INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender) VALUES ('334455667', 5, 18, '555-3344', 'Female');
+INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender) VALUES ('887654321', 5, 18, '111-2222', 'other');
+
 
 INSERT INTO ContactAddress (ContactNum, Address) VALUES ('555-1234', '123 Charity St');
 INSERT INTO ContactAddress (ContactNum, Address) VALUES ('555-9876', '456 Kindness Ave');
@@ -227,6 +229,7 @@ INSERT INTO FoodNameType (FoodName, FoodType) VALUES ('Milk', 'Dairy');
 INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (1, '123456789', 10, 90);
 INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (2, '987654321', 5, 45);
 INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (3, '112233445', 20, 180);
+INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (3, '887654321', 12, 40);
 INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (4, '223344556', 30, 470);
 INSERT INTO FoodReceived (FoodID, SinNum, Quantity, InventoryQuantity) VALUES (5, '334455667', 15, 285);
 
