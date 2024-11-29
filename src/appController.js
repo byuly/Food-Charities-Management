@@ -160,4 +160,14 @@ router.get("/recipient-age-count", async (req, res) => {
     }
 });
 
+router.get("/lowest-age-event-query", async (req, res) => {
+    try {
+        console.log('Received data:', req.body);
+        const results = await appService.lowestAgeEvent();
+        res.json(results);
+    } catch (error) {
+        console.error('Error in lowest age event query:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

@@ -144,6 +144,7 @@ window.onload = function() {
     document.getElementById('runAggregationQuery').addEventListener('click', runEventRecipientAggregation);
     document.getElementById('searchBtn').addEventListener('click', performCharitiesSearch);
     document.getElementById('runAgeCountQuery').addEventListener('click', runRecipientAgeCountQuery);
+    document.getElementById('lowestAgeEvent').addEventListener('click', lowestAgeEvent);
 };
 
 // General function to refresh the displayed table data.
@@ -490,4 +491,51 @@ async function runRecipientAgeCountQuery() {
         messageElement.style.color = 'red';
     }
 }
+
+async function lowestAgeEvent() {
+    const messageElement = document.getElementById('lowestAgeEventmsg');
+    const tableBody = document.getElementById('lowestAgeEventBody');
+
+    try {
+        tableBody.innerHTML = '';
+
+        const response = await fetch('/lowest-age-event-query');
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const results = await response.json();
+        console.log('Raw lowest age event results:', results);
+
+        if (!results || results.length === 0) {
+            messageElement.textContent = 'No events found with lowest average age';
+            messageElement.style.color = 'orange';
+            return;
+        }
+        results.forEach(result => {
+            const row = tableBody.insertRow();
+            const eventIdCell = row.insertCell(0);
+            const eventNameCell = row.insertCell(1);
+            const avgAgeCell = row.insertCell(2);
+
+            eventIdCell.textContent = result.EVENTID ?? 'N/A';
+            eventNameCell.textContent = result.EVENTNAME ?? 'N/A';
+            avgAgeCell.textContent = result.AVG_EVENT_AGE !== undefined
+                ? Number(result.AVG_EVENT_AGE).toFixed(2)
+                : 'N/A';
+        });
+
+        messageElement.textContent = `Event with the lowest average recipient age`;
+        messageElement.style.color = 'green';
+
+    } catch (error) {
+        console.error('Full error:', error);
+        messageElement.textContent = `Error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
+
+
 

@@ -347,6 +347,29 @@ async function getRecipientAgeCount() {
     });
 }
 
+async function lowestAgeEvent() {
+    return await withOracleDB(async (connection) => {
+        const result = await connection.execute(
+            `SELECT DE.EventID, DE.EventName, AVG(R.Age) AS AVG_EVENT_AGE
+            FROM DonationEvent DE
+            JOIN Recipients R ON DE.EventID = R.EventID
+            GROUP BY DE.EventID
+            HAVING AVG(R.Age) <= ALL (
+                SELECT AVG(R2.Age)
+                FROM Recipients R2
+                GROUP BY R2.EventID
+            )`
+        );
+
+        console.log('Raw result:', result.rows);
+
+        return result.rows.map(row => ({
+            EVENTID: row[0],
+            EVENTNAME: row[1],
+            AVG_EVENT_AGE: row[2]
+        }));
+    });
+}
 
 module.exports = {
     testOracleConnection,
@@ -360,5 +383,6 @@ module.exports = {
     getRecipientsForFood,
     getEventRecipientAggregation,
     searchCharities,
-    getRecipientAgeCount
+    getRecipientAgeCount,
+    lowestAgeEvent
 };
