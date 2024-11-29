@@ -66,6 +66,7 @@ async function withOracleDB(action) {
 }
 
 
+
 // ----------------------------------------------------------
 // Core functions for database operations
 // Modify these functions, especially the SQL queries, based on your project's requirements and design.
@@ -175,24 +176,33 @@ async function countDemotable() {
 
 async function insertRecipient(SinNum, EventID, Age, ContactNum, Gender) {
     return await withOracleDB(async (connection) => {
-        try {
-            const result = await connection.execute(
-                `INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender)
-                 VALUES (:SinNum, :EventID, :Age, :ContactNum, :Gender)`,
-                [SinNum, EventID, Age, ContactNum, Gender],
-                { autoCommit: true }
-            );
+        const result = await connection.execute(
+            `INSERT INTO Recipients (SinNum, EventID, Age, ContactNum, Gender)
+             VALUES (:SinNum, :EventID, :Age, :ContactNum, :Gender)`,
+            [SinNum, EventID, Age, ContactNum, Gender],
+            { autoCommit: true }
+        );
 
-            return result.rowsAffected && result.rowsAffected > 0; // Check if the row was inserted
-        } catch (error) {
-            console.error("Error executing insertRecipient:", error);
-            return false; // Return false on error
-        }
-    }).catch((err) => {
-        console.error("Database connection error:", err);
+        return result.rowsAffected && result.rowsAffected > 0;
+    }).catch(() => {
         return false;
     });
 }
+
+async function fetchRecipients() {
+    try {
+        const result = await withOracleDB(async (connection) => {
+            const result = await connection.execute('SELECT * FROM Recipients');
+            return result.rows;
+        });
+        return result || [];
+    } catch (error) {
+        console.error("Error fetching data from DB:", error);
+        return [];
+    }
+}
+
+
 
 module.exports = {
     testOracleConnection,
@@ -201,5 +211,6 @@ module.exports = {
     insertDemotable,
     updateNameDemotable,
     countDemotable,
-    insertRecipient
+    insertRecipient,
+    fetchRecipients
 };

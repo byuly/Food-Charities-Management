@@ -36,9 +36,10 @@
         <th>Name</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody id = 'charitiestable'>
     </tbody>
 </table>
+
 <button onclick="fetchAndDisplayUsers()">Show Users</button>
 
 
@@ -60,6 +61,8 @@
 
     <button type="submit"> insert </button> <br>
 </form>
+<p id='insertResultMsg'></p>
+
 <h2>Insert Recipient</h2>
 <form id="insertRecipientForm">
     Sin Number: <input type="text" id="sinNumber" placeholder="Enter SIN (9 digits)" pattern="\d{9}" required> <br><br>
@@ -76,21 +79,43 @@
     <br><br>
     <button type="submit">Insert</button>
 </form>
-<p id="insertResultMsg"></p>
+<p id='insertRecipientMsg'></p>
 
+<table id="recipientstable" border="1">
+    <thead>
+    <tr>
+        <!--Table head, need to be adjusted accordingly to align with your own.-->
+        <th>SinNum</th>
+        <th>EventID</th>
+        <th>Age</th>
+        <th>ContactNum</th>
+        <th>Gender</th>
+    </tr>
+    </thead>
+    <tbody id="recipients-body">
+    </tbody>
+</table>
+<h2>Update Name in DemoTable</h2>
+<p>The values are case sensitive and if you enter in the wrong case, the update statement will not do anything.</p>
+<form id="updateRecipient">
+    Old Name: <input type="text" id="updateOldSIN" placeholder="Enter Old Name" required> <br><br>
+    New Name: <input type="text" id="updateNewSIN" placeholder="Enter New Name" maxlength="20"> <br><br>
+
+    <button type="submit"> update </button> <br>
+</form>
 
 <br><hr><br> <!-- ========================================================================= -->
 
 <h2>Update Name in DemoTable</h2>
 <p>The values are case sensitive and if you enter in the wrong case, the update statement will not do anything.</p>
-<form id="updataNameDemotable">
+<form id="updateNameDemotable">
     Old Name: <input type="text" id="updateOldName" placeholder="Enter Old Name" required> <br><br>
     New Name: <input type="text" id="updateNewName" placeholder="Enter New Name" maxlength="20"> <br><br>
 
     <button type="submit"> update </button> <br>
 </form>
 <!-- A placeholder to display messages related to the update operation. -->
-<div id="updateNameResultMsg"></div>
+
 
 <br><hr><br> <!-- ========================================================================= -->
 

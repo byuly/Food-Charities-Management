@@ -283,4 +283,3 @@ INSERT INTO Volunteers (PhoneNumber, VolunteerHours) VALUES ('555-0002', 100);
 INSERT INTO Volunteers (PhoneNumber, VolunteerHours) VALUES ('555-0003', 80);
 INSERT INTO Volunteers (PhoneNumber, VolunteerHours) VALUES ('555-0004', 150);
 INSERT INTO Volunteers (PhoneNumber, VolunteerHours) VALUES ('555-0005', 90);
-

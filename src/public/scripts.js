@@ -39,7 +39,7 @@ async function checkDbConnection() {
 // Fetches data from the demotable and displays it.
 async function fetchAndDisplayUsers() {
     const tableElement = document.getElementById('demotable');
-    const tableBody = tableElement.querySelector('tbody');
+    const tableBody = document.getElementById('charitiestable');
 
     const response = await fetch('/demotable', {
         method: 'GET'
@@ -85,7 +85,7 @@ async function insertDemotable(event) {
     const idValue = document.getElementById('insertId').value;
     const addressValue = document.getElementById('insertAddress').value;
     const nameValue = document.getElementById('insertName').value;
-
+    console.log(idValue);
     const response = await fetch('/insert-demotable', {
         method: 'POST',
         headers: {
@@ -101,7 +101,7 @@ async function insertDemotable(event) {
 
     const responseData = await response.json();
     const messageElement = document.getElementById('insertResultMsg');
-
+      messageElement.textContent = "Data inserted successfully!";
     if (responseData.success) {
         messageElement.textContent = "Data inserted successfully!";
         fetchTableData();
@@ -166,59 +166,63 @@ window.onload = function() {
     fetchTableData();
     document.getElementById("resetDemotable").addEventListener("click", resetDemotable);
     document.getElementById("insertDemotable").addEventListener("submit", insertDemotable);
-    document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable);
+    document.getElementById("updateNameDemotable").addEventListener("submit", updateNameDemotable);
     document.getElementById("countDemotable").addEventListener("click", countDemotable);
+    document.getElementById('insertRecipientForm').addEventListener('submit', insertRecipient);
 };
 
 // General function to refresh the displayed table data.
 // You can invoke this after any table-modifying operation to keep consistency.
 function fetchTableData() {
     fetchAndDisplayUsers();
+    fetchAndDisplayRecipients();
 }
 
 async function insertRecipient(event) {
-    event.preventDefault(); // Prevent the default form submission
-    const sinNumber = document.getElementById('sinNumber').value;
-    const eventId = document.getElementById('eventId').value;
-    const age = document.getElementById('age').value;
-    const contactNumber = document.getElementById('contactNumber').value;
-    const gender = document.getElementById('gender').value;
-    try {
-        const response = await fetch('/insert-recipient', {
+    event.preventDefault();
+    const sinValue = document.getElementById('sinNumber').value;
+    console.log(sinValue);
+    const eventIDValue = document.getElementById('eventId').value;
+    const ageValue = document.getElementById('age').value;
+    const contactValue = document.getElementById('contactNumber').value;
+    const genderValue = document.getElementById('gender').value;
+
+    const response = await fetch('/insert-recipient', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                SinNum: sinNumber,
-                EventID: parseInt(eventId),
-                Age: parseInt(age),
-                ContactNum: contactNumber,
-                Gender: gender || null // Handle optional gender
-            })
-        });
-
-        const responseData = await response.json();
-        const messageElement = document.getElementById('insertResultMsg');
-
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ SinNum: sinValue, EventID: eventIDValue, Age: ageValue, ContactNum: contactValue, Gender: genderValue || null })
+    });
+    const responseData = await response.json();
+    const messageElement = document.getElementById('insertRecipientMsg')
         if (responseData.success) {
             messageElement.textContent = "Recipient inserted successfully!";
+            fetchTableData();
         } else {
-            if (responseDataBody.includes("Error: ORA-02291: integrity constraint") && responseDataBody.includes("violated - parent key not found")) {
-                                        messageElement.textContent = "Error inserting data! Please input a Judge License Number listed in the judge table.";
-                                    } else if (responseDataBody.includes("Error: ORA-00001: unique constraint")) {
-                                        messageElement.textContent = "Error inserting data! Please input a unique Case Number not used in the table.";
-                                    } else if (responseDataBody.includes("Error: Forbidden words in request")) {
-                                        messageElement.textContent = "Error inserting data! Please remove the forbidden words.";
-                                    } else {
-                                        messageElement.textContent = "Error inserting data!";
-                                    }
-                }
+           messageElement.textContent = "Error inserting data!";
+}}
 
-    } catch (error) {
-        if (responseDataBody.includes("Error: ORA-02291: integrity constraint") && responseDataBody.includes("violated - parent key not found")) {
+async function fetchAndDisplayRecipients() {
+    const tableElement = document.getElementById('recipienttable');
+    const tableBody = document.getElementById("recipients-body");
 
+    const response = await fetch('/recipients', {
+        method: 'GET'
+    });
+
+    const responseData = await response.json();
+    const recipientContent = responseData.data;
+
+    if (tableBody) {
+        tableBody.innerHTML = '';
     }
-    document.getElementById('insertRecipientForm').reset();
+
+    recipientContent.forEach(user => {
+        const row = tableBody.insertRow();
+        user.forEach((field, index) => {
+            const cell = row.insertCell(index);
+            cell.textContent = field;
+        });
+    });
 }
-document.getElementById('insertRecipientForm').addEventListener('submit', insertRecipient);
+
+

@@ -30,6 +30,7 @@ router.post("/initiate-demotable", async (req, res) => {
 });
 
 router.post("/insert-demotable", async (req, res) => {
+    console.log('Received data:', req.body);
     const { id: CharityID, address: Address, name: Name } = req.body;
     const insertResult = await appService.insertDemotable(CharityID, Address, Name);
     if (insertResult) {
@@ -65,19 +66,26 @@ router.get('/count-demotable', async (req, res) => {
 });
 
 
-router.post("/insert-recipient", async (req, res) => {
-    const { SinNum, EventID, Age, ContactNum, Gender } = req.body;
-    try {
-        const insertResult = await appService.insertRecipient(SinNum, EventID, Age, ContactNum, Gender);
-        if (insertResult) {
-            res.json({ success: true });
-        } else {
-            res.status(500).json({ success: false, message: "Failed to insert recipient" });
-        }
-    } catch (error) {
-        console.error("Error in /insert-recipient:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+router.post('/insert-recipient', async (req, res) => {
+    console.log('Received data:', req.body);
+    const {  SinNum,
+              EventID,
+              Age,
+              ContactNum,
+              Gender
+ } = req.body;
+    const result = await appService.insertRecipient(SinNum, EventID, Age, ContactNum, Gender);
+    if (result) {
+        res.status(200).json({ success: true });
+    } else {
+        res.status(400).json({ success: false});
     }
 });
+
+router.get('/recipients', async (req, res) => {
+    const tableContent = await appService.fetchRecipients();
+    res.json({data: tableContent});
+});
+
 
 module.exports = router;
