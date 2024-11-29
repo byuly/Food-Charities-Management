@@ -151,20 +151,6 @@ async function insertDemotable(CharityID, Address, Name) {
     });
 }
 
-async function updateNameDemotable(oldName, newName) {
-    return await withOracleDB(async (connection) => {
-        const result = await connection.execute(
-            `UPDATE DEMOTABLE SET name=:newName where name=:oldName`,
-            [newName, oldName],
-            { autoCommit: true }
-        );
-
-        return result.rowsAffected && result.rowsAffected > 0;
-    }).catch(() => {
-        return false;
-    });
-}
-
 async function countDemotable() {
     return await withOracleDB(async (connection) => {
         const result = await connection.execute('SELECT Count(*) FROM DEMOTABLE');
@@ -258,16 +244,9 @@ async function getRecipientsForFood(foodID) {
                 Recipients R ON FR.SinNum = R.SinNum
             WHERE
                 FR.FoodID = :foodID`,
-            { foodID },
-            {
-                outFormat: connection.OBJECT, // we want javascript object
-                // we want mapping for the column names!!
-                converters: {
-                    SINNUM: (value) => value,
-                    CONTACTNUM: (value) => value
-                }
-            }
+            { foodID }
         );
+        console.log('Raw result:', result.rows);
         // we need to extract nested array to display on frontend
         return result.rows.map(row => ({
             SinNum: row[0],
@@ -276,15 +255,110 @@ async function getRecipientsForFood(foodID) {
     });
 }
 
+async function getEventRecipientAggregation() {
+    return await withOracleDB(async (connection) => {
+        const result = await connection.execute(
+            `SELECT
+                R.EventID,
+                ROUND(AVG(R.Age), 2) AS AVG_AGE,
+                COUNT(*) AS RECIPIENT_COUNT
+            FROM
+                Recipients R
+            GROUP BY
+                R.EventID
+            HAVING
+                COUNT(*) >= 2`
+        );
+
+        console.log('Raw result:', result.rows);
+        return result.rows.map(row => ({
+            EVENTID: row[0],
+            AVG_AGE: row[1],
+            RECIPIENT_COUNT: row[2]
+        }));
+    });
+}
+
+// SELECT!!!!!!!
+async function searchCharities(conditions, logicalOperator) {
+    return await withOracleDB(async (connection) => {
+        const whereClauses = [];
+        const bindParams = {};
+
+        conditions.forEach((condition, index) => {
+            let paramName = `param${index}`;
+            let clause;
+            switch(condition.operator) {
+                case '<':
+                    clause = `${condition.attribute} < :${paramName}`;
+                    bindParams[paramName] = condition.value;
+                    break;
+                case '>':
+                    clause = `${condition.attribute} > :${paramName}`;
+                    bindParams[paramName] = condition.value;
+                    break;
+                case '=':
+                    clause = `${condition.attribute} = :${paramName}`;
+                    bindParams[paramName] = condition.value;
+                    break;
+                case '!=':
+                    clause = `${condition.attribute} != :${paramName}`;
+                    bindParams[paramName] = condition.value;
+                    break;
+                default:
+                    throw new Error(`Unsupported operator: ${condition.operator}`);
+            }
+            whereClauses.push(clause);
+        });
+
+        const sqlQuery = `
+            SELECT CharityID, Name, Address
+            FROM Charities
+            ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(` ${logicalOperator} `) : ''}
+        `;
+
+        console.log('Executing SQL:', sqlQuery);
+        console.log('Bind parameters:', bindParams);
+
+        const result = await connection.execute(
+            sqlQuery,
+            bindParams,
+            { outFormat: connection.OBJECT }
+        );
+        console.log(result.rows);
+        return result.rows;
+    });
+}
+
+async function getRecipientAgeCount() {
+    return await withOracleDB(async (connection) => {
+        const result = await connection.execute(
+            `SELECT Age, COUNT(*) AS AGE_COUNT
+             FROM Recipients
+             GROUP BY Age`
+        );
+
+        console.log('Raw result:', result.rows);
+
+        return result.rows.map(row => ({
+            AGE: row[0],
+            AGE_COUNT: row[1]
+        }));
+    });
+}
+
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
     initiateDemotable,
     insertDemotable,
-    updateNameDemotable,
     countDemotable,
     insertRecipient,
     fetchRecipients,
     updateRecipients,
-    getRecipientsForFood
+    getRecipientsForFood,
+    getEventRecipientAggregation,
+    searchCharities,
+    getRecipientAgeCount
 };

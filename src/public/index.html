@@ -63,6 +63,23 @@
 </form>
 <p id='insertResultMsg'></p>
 
+<br><hr><br>
+
+<h2>Recipient Table</h2>
+<table id="recipientstable" border="1">
+    <thead>
+    <tr>
+        <th>SinNum</th>
+        <th>EventID</th>
+        <th>Age</th>
+        <th>ContactNum</th>
+        <th>Gender</th>
+    </tr>
+    </thead>
+    <tbody id="recipients-body">
+    </tbody>
+</table>
+
 <!--INSERT recipient with eventID 1-6, (other eventID does not exist)-->
 <h2>Insert Recipient</h2>
 <form id="insertRecipientForm">
@@ -82,21 +99,8 @@
 </form>
 <p id='insertRecipientMsg'></p>
 
-<h2>Recipient Table</h2>
-<table id="recipientstable" border="1">
-    <thead>
-    <tr>
-        <th>SinNum</th>
-        <th>EventID</th>
-        <th>Age</th>
-        <th>ContactNum</th>
-        <th>Gender</th>
-    </tr>
-    </thead>
-    <tbody id="recipients-body">
-    </tbody>
 
-</table>
+<br><hr><br>
 <! -- UPDATE but DONOT change recipient with eventID 5! (for join query) -->
 <h2>Update Recipients</h2>
 <table id="recipientstable2" border="1">
@@ -179,19 +183,106 @@
 <div id="foodRecipientsMessage"></div>
 
 <br><hr><br> <!-- ========================================================================= -->
+<h2>What events have 2 or more recipients? Click to find out! </h2>
+<div id="aggregationQueryContainer">
+    <button id="runAggregationQuery">
+        Find Events with 5 or More Recipients
+    </button>
+</div>
 
-<h2>Update Name in DemoTable</h2>
-<p>The values are case sensitive and if you enter in the wrong case, the update statement will not do anything.</p>
-<form id="updateNameDemotable">
-    Old Name: <input type="text" id="updateOldName" placeholder="Enter Old Name" required> <br><br>
-    New Name: <input type="text" id="updateNewName" placeholder="Enter New Name" maxlength="20"> <br><br>
+<div id="aggregationResultContainer">
+    <table id="aggregationResultTable">
+        <thead>
+        <tr>
+            <th>Event ID</th>
+            <th>Average Age</th>
+            <th>Total Recipients</th>
+        </tr>
+        </thead>
+        <tbody id="aggregationResultBody">
+        <!-- Results will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
 
-    <button type="submit"> update </button> <br>
-</form>
-<!-- A placeholder to display messages related to the update operation. -->
+<div id="aggregationQueryMessage"></div>
 
+<br><hr><br>
+<h2>Charities SELECT</h2>
 
-<br><hr><br> <!-- ========================================================================= -->
+<div id="searchContainer">
+    <div id="conditionsContainer">
+        <div class="condition-row">
+            <select class="attribute-select">
+                <option value="CharityID">Charity ID</option>
+                <option value="Name">Name</option>
+                <option value="Address">Address</option>
+            </select>
+
+            <select class="operator-select">
+                <option value="=">=</option>
+                <option value=">">> </option>
+                <option value="<"> <</option>
+                <option value="!=">!=</option>
+            </select>
+
+            <input type="text" class="value-input" placeholder="Enter value">
+
+            <button class="remove-condition" style="display:none;">-</button>
+        </div>
+    </div>
+
+    <div class="search-controls">
+        <select id="logicalOperator">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+        </select>
+
+        <button id="addConditionBtn">Add Condition</button>
+        <button id="searchBtn">Search</button>
+    </div>
+</div>
+
+<div id="searchResultContainer">
+    <table id="searchResultTable">
+        <thead>
+        <tr>
+            <th>Charity ID</th>
+            <th>Name</th>
+            <th>Address</th>
+        </tr>
+        </thead>
+        <tbody id="searchResultBody">
+        <!-- Results will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<div id="searchMessage"></div>
+
+<br><hr><br>
+
+<h2>Recipient Count by Age</h2>
+<div id="ageCountQueryContainer">
+    <button id="runAgeCountQuery">Count Recipients by Age</button>
+</div>
+<div id="ageCountResultContainer">
+    <table id="ageCountResultTable">
+        <thead>
+        <tr>
+            <th>Age</th>
+            <th>Recipient Count</th>
+        </tr>
+        </thead>
+        <tbody id="ageCountResultBody">
+
+        </tbody>
+    </table>
+</div>
+<div id="ageCountQueryMessage"></div>
+
+<br><hr><br>
+
 
 <h2>Count the Tuples in DemoTable</h2>
 <button id="countDemotable"> count </button> <br><br>

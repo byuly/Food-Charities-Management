@@ -40,16 +40,6 @@ router.post("/insert-demotable", async (req, res) => {
     }
 });
 
-router.post("/update-name-demotable", async (req, res) => {
-    const { oldName, newName } = req.body;
-    const updateResult = await appService.updateNameDemotable(oldName, newName);
-    if (updateResult) {
-        res.json({ success: true });
-    } else {
-        res.status(500).json({ success: false });
-    }
-});
-
 router.get('/count-demotable', async (req, res) => {
     const tableCount = await appService.countDemotable();
     if (tableCount >= 0) {
@@ -127,6 +117,46 @@ router.get("/recipients-for-food/:foodID", async (req, res) => {
             success: false,
             message: error.message
         });
+    }
+});
+
+router.get("/event-recipient-aggregation", async (req, res) => {
+    try {
+        const results = await appService.getEventRecipientAggregation();
+        res.json(results);
+    } catch (error) {
+        console.error('Error in event recipient aggregation:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// SELECT!!!
+router.post("/search-charities", async (req, res) => {
+    try {
+        console.log('Received data:', req.body);
+        const { conditions, logicalOperator } = req.body;
+        const results = await appService.searchCharities(conditions, logicalOperator);
+        res.json(results);
+    } catch (error) {
+        console.error('Error in charity search:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+router.get("/recipient-age-count", async (req, res) => {
+    try {
+        console.log('Received data:', req.body);
+        const results = await appService.getRecipientAgeCount();
+        res.json(results);
+    } catch (error) {
+        console.error('Error in recipient age count:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

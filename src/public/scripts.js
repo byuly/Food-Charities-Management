@@ -110,35 +110,6 @@ async function insertDemotable(event) {
     }
 }
 
-// Updates names in the demotable.
-async function updateNameDemotable(event) {
-    event.preventDefault();
-
-    const oldNameValue = document.getElementById('updateOldName').value;
-    const newNameValue = document.getElementById('updateNewName').value;
-
-    const response = await fetch('/update-name-demotable', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            oldName: oldNameValue,
-            newName: newNameValue
-        })
-    });
-
-    const responseData = await response.json();
-    const messageElement = document.getElementById('updateNameResultMsg');
-
-    if (responseData.success) {
-        messageElement.textContent = "Name updated successfully!";
-        fetchTableData();
-    } else {
-        messageElement.textContent = "Error updating name!";
-    }
-}
-
 // Counts rows in the demotable.
 // Modify the function accordingly if using different aggregate functions or procedures.
 async function countDemotable() {
@@ -166,11 +137,13 @@ window.onload = function() {
     fetchTableData();
     document.getElementById("resetDemotable").addEventListener("click", resetDemotable);
     document.getElementById("insertDemotable").addEventListener("submit", insertDemotable);
-    document.getElementById("updateNameDemotable").addEventListener("submit", updateNameDemotable);
     document.getElementById("countDemotable").addEventListener("click", countDemotable);
     document.getElementById('insertRecipientForm').addEventListener('submit', insertRecipient);
     document.getElementById('updateRecipient').addEventListener('submit', updateRecipients);
     document.getElementById('foodRecipientsForm').addEventListener('submit', fetchFoodRecipients);
+    document.getElementById('runAggregationQuery').addEventListener('click', runEventRecipientAggregation);
+    document.getElementById('searchBtn').addEventListener('click', performCharitiesSearch);
+    document.getElementById('runAgeCountQuery').addEventListener('click', runRecipientAgeCountQuery);
 };
 
 // General function to refresh the displayed table data.
@@ -198,9 +171,11 @@ async function insertRecipient(event) {
     const messageElement = document.getElementById('insertRecipientMsg')
         if (responseData.success) {
             messageElement.textContent = "Recipient inserted successfully!";
+            messageElement.style.color = 'green';
             fetchTableData();
         } else {
            messageElement.textContent = "Error inserting data!";
+           messageElement.style.color = 'red';
 }}
 
 async function fetchAndDisplayRecipients() {
@@ -331,5 +306,188 @@ async function fetchFoodRecipients(event) {
     }
 }
 
+async function runEventRecipientAggregation() {
+    const messageElement = document.getElementById('aggregationQueryMessage');
+    const tableBody = document.getElementById('aggregationResultBody');
 
+    try {
+        tableBody.innerHTML = '';
+        messageElement.textContent = '';
+
+        const response = await fetch('/event-recipient-aggregation');
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const results = await response.json();
+        console.log('Raw aggregation results:', results);
+
+        if (!results || results.length === 0) {
+            messageElement.textContent = 'No events found with 5 or more recipients';
+            messageElement.style.color = 'orange';
+            return;
+        }
+
+        results.forEach(result => {
+            console.log('Processing result:', result);
+            const row = tableBody.insertRow();
+
+            const eventIdCell = row.insertCell(0);
+            const avgAgeCell = row.insertCell(1);
+            const recipientCountCell = row.insertCell(2);
+
+            eventIdCell.textContent = result.EVENTID ?? 'N/A';
+            avgAgeCell.textContent = result.AVG_AGE !== undefined
+                ? Number(result.AVG_AGE).toFixed(2)
+                : 'N/A';
+            recipientCountCell.textContent = result.RECIPIENT_COUNT ?? 'N/A';
+        });
+
+        messageElement.textContent = `Found ${results.length} events with 2 or more recipients`;
+        messageElement.style.color = 'green';
+
+    } catch (error) {
+        console.error('Full error:', error);
+        messageElement.textContent = `Error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
+
+document.getElementById('addConditionBtn').addEventListener('click', function() {
+    const conditionsContainer = document.getElementById('conditionsContainer');
+    const templateRow = conditionsContainer.querySelector('.condition-row');
+    const newRow = templateRow.cloneNode(true);
+
+    newRow.querySelector('.value-input').value = '';
+
+    const removeBtn = newRow.querySelector('.remove-condition');
+    removeBtn.style.display = 'inline-block';
+
+    removeBtn.addEventListener('click', function() {
+        newRow.remove();
+    });
+
+    conditionsContainer.appendChild(newRow);
+});
+
+async function performCharitiesSearch() {
+    const conditionsContainer = document.getElementById('conditionsContainer');
+    const logicalOperator = document.getElementById('logicalOperator').value;
+    const messageElement = document.getElementById('searchMessage');
+    const tableBody = document.getElementById('searchResultBody');
+
+    const conditions = [];
+    const conditionRows = conditionsContainer.querySelectorAll('.condition-row');
+
+    conditionRows.forEach(row => {
+        const attribute = row.querySelector('.attribute-select').value;
+        const operator = row.querySelector('.operator-select').value;
+        const value = row.querySelector('.value-input').value.trim();
+
+        if (value) { //skip if value empty
+            conditions.push({ attribute, operator, value });
+        }
+    });
+
+    if (conditions.length === 0) {
+        messageElement.textContent = 'Please enter at least one search condition';
+        messageElement.style.color = 'red';
+        return;
+    }
+
+    try {
+        tableBody.innerHTML = '';
+        messageElement.textContent = '';
+
+        const response = await fetch('/search-charities', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                conditions,
+                logicalOperator
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const results = await response.json();
+        console.log('Search results:', results);
+
+        if (!results || results.length === 0) {
+            messageElement.textContent = 'No charities found matching the search criteria';
+            messageElement.style.color = 'orange';
+            return;
+        }
+
+       results.forEach(charity => {
+           const row = tableBody.insertRow();
+
+           const idCell = row.insertCell(0);
+           const nameCell = row.insertCell(1);
+           const addressCell = row.insertCell(2);
+
+           idCell.textContent = charity[0];
+           nameCell.textContent = charity[1];
+           addressCell.textContent = charity[2];
+       });
+
+        messageElement.textContent = `Found ${results.length} charities matching the search criteria`;
+        messageElement.style.color = 'green';
+
+    } catch (error) {
+        console.error('Search error:', error);
+        messageElement.textContent = `Error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
+
+async function runRecipientAgeCountQuery() {
+    const messageElement = document.getElementById('ageCountQueryMessage');
+    const tableBody = document.getElementById('ageCountResultBody');
+
+    try {
+        tableBody.innerHTML = '';
+        messageElement.textContent = '';
+
+        const response = await fetch('/recipient-age-count');
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const results = await response.json();
+        console.log('Raw age count results:', results);
+
+        if (!results || results.length === 0) {
+            messageElement.textContent = 'No age count data found';
+            messageElement.style.color = 'orange';
+            return;
+        }
+
+        results.forEach(result => {
+            const row = tableBody.insertRow();
+            const ageCell = row.insertCell(0);
+            const countCell = row.insertCell(1);
+
+            ageCell.textContent = result.AGE ?? 'N/A';
+            countCell.textContent = result.AGE_COUNT ?? 'N/A';
+        });
+
+        messageElement.textContent = `Found recipient counts for ${results.length} different ages`;
+        messageElement.style.color = 'green';
+
+    } catch (error) {
+        console.error('Error!! :', error);
+        messageElement.textContent = `Error: ${error.message}`;
+        messageElement.style.color = 'red';
+    }
+}
 
