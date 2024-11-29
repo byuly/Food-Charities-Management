@@ -353,7 +353,7 @@ async function lowestAgeEvent() {
             `SELECT DE.EventID, DE.EventName, AVG(R.Age) AS AVG_EVENT_AGE
             FROM DonationEvent DE
             JOIN Recipients R ON DE.EventID = R.EventID
-            GROUP BY DE.EventID
+            GROUP BY DE.EventID, DE.EventName
             HAVING AVG(R.Age) <= ALL (
                 SELECT AVG(R2.Age)
                 FROM Recipients R2
