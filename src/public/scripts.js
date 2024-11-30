@@ -362,7 +362,6 @@ async function runEventRecipientAggregation() {
     }
 }
 
-// Utility function to create a logical operator display
 function createLogicalOperator(type) {
     const operatorSpan = document.createElement('span');
     operatorSpan.textContent = type;
@@ -370,7 +369,6 @@ function createLogicalOperator(type) {
     return operatorSpan;
 }
 
-// Function to add a new condition row
 function addConditionRow(logicalOperator) {
     const conditionsContainer = document.getElementById('conditionsContainer');
 

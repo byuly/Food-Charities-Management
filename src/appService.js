@@ -303,21 +303,17 @@ async function searchCharities(conditions, logicalOperators) {
                     throw new Error(`Unsupported operator: ${condition.operator}`);
             }
 
-            // Bind parameter
             bindParams[paramName] = condition.value;
             whereClauses.push(clause);
         });
 
-        // Construct SQL query with custom logical operators
         let sqlQuery = 'SELECT CharityID, Name, Address FROM Charities';
 
         if (whereClauses.length > 0) {
             sqlQuery += ' WHERE ';
 
-            // First condition
             sqlQuery += whereClauses[0];
 
-            // Add subsequent conditions with their logical operators
             for (let i = 1; i < whereClauses.length; i++) {
                 sqlQuery += ` ${logicalOperators[i-1]} ${whereClauses[i]}`;
             }
