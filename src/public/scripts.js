@@ -147,6 +147,9 @@ window.onload = function() {
     document.getElementById('searchBtn').addEventListener('click', performCharitiesSearch);
     document.getElementById('addAndConditionBtn').addEventListener('click', () => addConditionRow('AND'));
     document.getElementById('addOrConditionBtn').addEventListener('click', () => addConditionRow('OR'));
+    document.getElementById("projectionForm").addEventListener("submit", projectionCharity);
+    document.getElementById("divisionButton").addEventListener("click", divisionRecipients);
+    document.getElementById("deleteFoodDonor").addEventListener("submit", deleteDonor);
 };
 
 // General function to refresh the displayed table data.
@@ -154,6 +157,7 @@ window.onload = function() {
 function fetchTableData() {
     fetchAndDisplayUsers();
     fetchAndDisplayRecipients();
+    fetchAndDisplayFoodDonor()
 }
 
 async function insertRecipient(event) {
@@ -555,5 +559,135 @@ async function lowestAgeEvent() {
     }
 }
 
+async function projectionCharity(event) {
+    event.preventDefault();
 
+    const checkboxes = document.querySelectorAll('input[name="attributes"]:checked');
+    const selectedAttributes = Array.from(checkboxes).map((checkbox) => checkbox.value);
+
+    if (selectedAttributes.length === 0) {
+        document.getElementById('projectionResultMsg').textContent = 'Please select at least one attribute.';
+        return;
+    }
+
+    const response = await fetch('/projection', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({attributes: selectedAttributes}),
+    });
+
+    const responseData = await response.json();
+    const resultElement = document.getElementById('projectionResultMsg');
+
+    if (responseData.success) {
+        resultElement.innerHTML = '';
+
+        const table = document.createElement('table');
+        table.border = 1;
+
+        const headerRow = document.createElement('tr');
+        selectedAttributes.forEach((attribute) => {
+            const th = document.createElement('th');
+            th.textContent = attribute;
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+
+        responseData.data.forEach((row) => {
+            const tableRow = document.createElement('tr');
+            row.forEach((cell) => {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                tableRow.appendChild(td);
+            });
+            table.appendChild(tableRow);
+        });
+
+        resultElement.appendChild(table);
+    } else {
+        resultElement.textContent = 'Error fetching projection results.';
+    }
+}
+
+async function divisionRecipients() {
+    console.log("clicked");
+        try {
+            const response = await fetch('/division-query');
+            const responseData = await response.json();
+            const tableBody = document.querySelector("#resultTable tbody");
+
+            if (tableBody) {
+                tableBody.innerHTML = '';
+            }
+
+            responseData.data.forEach(row => {
+                const tr = tableBody.insertRow();
+                Object.values(row).forEach((field, index) => {
+                    const cell = tr.insertCell(index);
+                    cell.textContent = field;
+                });
+            });
+        } catch (error) {
+            console.error("Error fetching division query results:", error);
+        }
+}
+
+async function deleteDonor(event) {
+    event.preventDefault();
+
+    const donorIdValue = document.getElementById("deleteDonorID").value;
+
+    const response = await fetch("/delete-donor", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({donorId: donorIdValue}),
+    });
+
+    const responseData = await response.json();
+    const messageElement = document.getElementById("deleteResultMsg");
+    if (responseData.success) {
+        fetchTableData();
+        messageElement.textContent = "FoodDonor deleted successfully!";
+    } else {
+        messageElement.textContent = "Error deleting FoodDonor!";
+    }
+}
+
+async function fetchAndDisplayFoodDonor() {
+    const tableElement = document.getElementById('fooddonor');
+    const tableBody = document.getElementById('fooddonorstable');
+
+    try {
+        const response = await fetch('/fooddonor', {
+            method: 'GET'
+        });
+
+        const responseData = await response.json();
+        const demotableContent = responseData.data;
+
+        if (tableBody) {
+            tableBody.innerHTML = '';
+        }
+
+        demotableContent.forEach(donor => {
+            const row = tableBody.insertRow();
+
+            const donorIdCell = row.insertCell(0);
+            const nameCell = row.insertCell(1);
+            const typeCell = row.insertCell(2);
+            const receiptNumCell = row.insertCell(3);
+
+            donorIdCell.textContent = donor[0];
+            nameCell.textContent = donor[1];
+            typeCell.textContent = donor[2];
+            receiptNumCell.textContent = donor[3];
+        });
+    } catch (error) {
+        console.error('Error fetching food donors:', error);
+    }
+}
 

@@ -167,4 +167,55 @@ router.get("/lowest-age-event-query", async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+router.post('/projection', async (req, res) => {
+    const { attributes } = req.body;
+
+    if (!attributes || attributes.length === 0) {
+        return res.status(400).json({ success: false, message: 'No attributes selected'})
+    }
+
+    const projectionResult = await appService.performProjection(attributes);
+
+    if (projectionResult) {
+        res.json({
+            success: true,
+            data: projectionResult
+        });
+    } else {
+        res.status(500).json({ success: false, message: 'Failed to fetch projection results.'});
+    }
+});
+
+router.get('/division-query', async (req, res) => {
+    const recipients = await appService.divisionRecipients();
+    if (recipients.length > 0) {
+        res.json({ data: recipients });
+    } else {
+        res.status(500).json({ success: false, data: [] });
+    }
+});
+
+router.post("/delete-donor", async (req, res) => {
+    const { donorId } = req.body;
+    const deleteResult = await appService.deleteDonor(donorId);
+
+    if (deleteResult) {
+        res.json({ success: true });
+    } else {
+        res.status(500).json({ success: false });
+    }
+});
+
+router.get('/fooddonor', async (req, res) => {
+    try {
+        const tableContent = await appService.fetchFoodDonor();
+        res.json({data: tableContent});
+    } catch (error) {
+        console.error('Error in /fooddonor:', error);
+        res.status(500).json({ error: 'Failed to fetch food donors' });
+    }
+});
+
+
 module.exports = router;

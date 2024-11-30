@@ -18,7 +18,6 @@ CREATE TABLE DonationEvent (
     ON DELETE CASCADE
 );
 
-
 -- Recipients table
 CREATE TABLE Recipients (
     SinNum CHAR(9) PRIMARY KEY,

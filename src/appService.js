@@ -378,6 +378,71 @@ async function lowestAgeEvent() {
     });
 }
 
+async function performProjection(attributes) {
+    const selectedColumns = attributes.join(', ');
+
+    return await withOracleDB(async (connection) => {
+        const query = `SELECT ${selectedColumns} FROM Charities`;
+        const result = await connection.execute(query);
+        return result.rows;
+    }).catch((err) => {
+        console.error('Error performing projection:', err);
+        return null;
+    });
+}
+
+async function divisionRecipients() {
+    return await withOracleDB(async (connection) => {
+        const result = await connection.execute(`
+            SELECT DISTINCT R1.ContactNum
+            FROM Recipients R1
+            WHERE NOT EXISTS (
+                SELECT E.EventID
+                FROM Recipients E
+                WHERE NOT EXISTS (
+                    SELECT R2.ContactNum
+                    FROM Recipients R2
+                    WHERE R2.ContactNum = R1.ContactNum AND R2.EventID = E.EventID
+                )
+            )
+        `);
+
+        return result.rows.map(row => ({ SinNUM: row[0] }));
+    }).catch((err) => {
+        console.error('Error fetching recipients:', err);
+        return [];
+    });
+}
+
+async function deleteDonor(donorId) {
+    return await withOracleDB(async (connection) => {
+
+        const result = await connection.execute(
+            'DELETE FROM FoodDonors WHERE DonorID = :donorId',
+            [donorId],
+            {autoCommit: true}
+        );
+        return result.rowsAffected && result.rowsAffected > 0;
+    }).catch(() => {
+        return false;
+    });
+
+}
+
+async function fetchFoodDonor() {
+    try {
+        const result = await withOracleDB(async (connection) => {
+            const result = await connection.execute('SELECT * FROM FoodDonors');
+            return result.rows;
+        });
+        return result || [];
+    } catch (error) {
+        console.error("Error fetching data from DB:", error);
+        return [];
+    }
+}
+
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
@@ -391,5 +456,9 @@ module.exports = {
     getEventRecipientAggregation,
     searchCharities,
     getRecipientAgeCount,
-    lowestAgeEvent
+    lowestAgeEvent,
+    performProjection,
+    divisionRecipients,
+    deleteDonor,
+    fetchFoodDonor
 };

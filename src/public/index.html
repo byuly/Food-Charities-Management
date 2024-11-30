@@ -41,8 +41,6 @@
     </tbody>
 </table>
 
-<button onclick="fetchAndDisplayUsers()">Show Users</button>
-
 
 <br><hr><br> <!-- ========================================================================= -->
 
@@ -153,60 +151,26 @@
 <div id="updateRecipientResultMsg"></div>
 
 <br><hr><br> <!-- ========================================================================= -->
-<! -- JOINNNNN with FOODID return, SINNUM and CONTACT NUM (of people who donated food with this foodID) -->
-<h2>Recipients by Food Item</h2>
-<form id="foodRecipientsForm">
-    <label for="foodIDInput">Food ID:</label>
-    <input
-            type="number"
-            id="foodIDInput"
-            placeholder="Enter Food ID"
-            required
-            min="1"
-    >
-    <button type="submit">Find Recipients</button>
+<h2>Food Donors Table</h2>
+<table id="fooddonor" border="1">
+    <thead>
+    <tr>
+        <th>Donor ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Receipt Number</th>
+    </tr>
+    </thead>
+    <tbody id='fooddonorstable'>
+    </tbody>
+</table>
+
+<h2> Delete Food Donors </h2>
+<form id="deleteFoodDonor">
+    Donor ID: <input type="number" id="deleteDonorID" placeholder="Enter Donor ID" required> <br><br>
+    <button type="submit" id="deleteButton"> Delete </button>
 </form>
-
-<div id="recipientsResultContainer">
-    <table id="recipientsTables">
-        <thead>
-        <tr>
-            <th>SIN Number</th>
-            <th>Contact Number</th>
-        </tr>
-        </thead>
-        <tbody id="recipientsTableBody">
-
-        </tbody>
-    </table>
-</div>
-
-<div id="foodRecipientsMessage"></div>
-
-<br><hr><br> <!-- ========================================================================= -->
-<h2>What events have 2 or more recipients? Click to find out! </h2>
-<div id="aggregationQueryContainer">
-    <button id="runAggregationQuery">
-        Find Events with 5 or More Recipients
-    </button>
-</div>
-
-<div id="aggregationResultContainer">
-    <table id="aggregationResultTable">
-        <thead>
-        <tr>
-            <th>Event ID</th>
-            <th>Average Age</th>
-            <th>Total Recipients</th>
-        </tr>
-        </thead>
-        <tbody id="aggregationResultBody">
-
-        </tbody>
-    </table>
-</div>
-
-<div id="aggregationQueryMessage"></div>
+<div id="deleteResultMsg"></div>
 
 <br><hr><br>
 
@@ -252,6 +216,47 @@
 
 <br><hr><br>
 
+<h2> Projection Charity </h2>
+<form id="projectionForm">
+    <label><input type="checkbox" name="attributes" value="CharityID"> CharityID</label><br>
+    <label><input type="checkbox" name="attributes" value="Address"> Address</label><br>
+    <label><input type="checkbox" name="attributes" value="Name"> Name</label><br>
+    <button type="submit" id="submitProjection">Submit</button>
+</form>
+<div id="projectionResultMsg"></div>
+<br><hr><br> <!-- ========================================================================= -->
+<! -- JOINNNNN with FOODID return, SINNUM and CONTACT NUM (of people who donated food with this foodID) -->
+<h2>Recipients by Food Item</h2>
+<form id="foodRecipientsForm">
+    <label for="foodIDInput">Food ID:</label>
+    <input
+            type="number"
+            id="foodIDInput"
+            placeholder="Enter Food ID"
+            required
+            min="1"
+    >
+    <button type="submit">Find Recipients</button>
+</form>
+
+<div id="recipientsResultContainer">
+    <table id="recipientsTables">
+        <thead>
+        <tr>
+            <th>SIN Number</th>
+            <th>Contact Number</th>
+        </tr>
+        </thead>
+        <tbody id="recipientsTableBody">
+
+        </tbody>
+    </table>
+</div>
+
+<div id="foodRecipientsMessage"></div>
+
+<br><hr><br> <!-- ========================================================================= -->
+
 <h2>Recipient Count by Age</h2>
 <div id="ageCountQueryContainer">
     <button id="runAgeCountQuery">Count Recipients by Age</button>
@@ -295,6 +300,48 @@
 
 <br><hr><br>
 
+<h2>What events have 2 or more recipients? Click to find out! </h2>
+<div id="aggregationQueryContainer">
+    <button id="runAggregationQuery">
+        Find Events with 5 or More Recipients
+    </button>
+</div>
+
+<div id="aggregationResultContainer">
+    <table id="aggregationResultTable">
+        <thead>
+        <tr>
+            <th>Event ID</th>
+            <th>Average Age</th>
+            <th>Total Recipients</th>
+        </tr>
+        </thead>
+        <tbody id="aggregationResultBody">
+
+        </tbody>
+    </table>
+</div>
+
+<div id="aggregationQueryMessage"></div>
+
+<br><hr><br>
+
+
+<h2> Division: Find Contact Number of Recipients Attended All Donation Event </h2>
+<button id="divisionButton">Search</button><br><br>
+<h2>Result</h2>
+<table id="resultTable" border="1">
+    <thead>
+    <tr>
+        <th>ContactNum</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+<br><hr><br>
 
 <h2>Count the Tuples in DemoTable</h2>
 <button id="countDemotable"> count </button> <br><br>
