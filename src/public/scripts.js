@@ -142,9 +142,11 @@ window.onload = function() {
     document.getElementById('updateRecipient').addEventListener('submit', updateRecipients);
     document.getElementById('foodRecipientsForm').addEventListener('submit', fetchFoodRecipients);
     document.getElementById('runAggregationQuery').addEventListener('click', runEventRecipientAggregation);
-    document.getElementById('searchBtn').addEventListener('click', performCharitiesSearch);
     document.getElementById('runAgeCountQuery').addEventListener('click', runRecipientAgeCountQuery);
     document.getElementById('lowestAgeEvent').addEventListener('click', lowestAgeEvent);
+    document.getElementById('searchBtn').addEventListener('click', performCharitiesSearch);
+    document.getElementById('addAndConditionBtn').addEventListener('click', () => addConditionRow('AND'));
+    document.getElementById('addOrConditionBtn').addEventListener('click', () => addConditionRow('OR'));
 };
 
 // General function to refresh the displayed table data.
@@ -356,8 +358,22 @@ async function runEventRecipientAggregation() {
     }
 }
 
-document.getElementById('addConditionBtn').addEventListener('click', function() {
+// Utility function to create a logical operator display
+function createLogicalOperator(type) {
+    const operatorSpan = document.createElement('span');
+    operatorSpan.textContent = type;
+    operatorSpan.classList.add('logical-operator');
+    return operatorSpan;
+}
+
+// Function to add a new condition row
+function addConditionRow(logicalOperator) {
     const conditionsContainer = document.getElementById('conditionsContainer');
+
+    if (conditionsContainer.children.length > 0) {
+        conditionsContainer.appendChild(createLogicalOperator(logicalOperator));
+    }
+
     const templateRow = conditionsContainer.querySelector('.condition-row');
     const newRow = templateRow.cloneNode(true);
 
@@ -365,30 +381,36 @@ document.getElementById('addConditionBtn').addEventListener('click', function() 
 
     const removeBtn = newRow.querySelector('.remove-condition');
     removeBtn.style.display = 'inline-block';
-
     removeBtn.addEventListener('click', function() {
+        const prevOperator = newRow.previousElementSibling;
+        if (prevOperator && prevOperator.classList.contains('logical-operator')) {
+            prevOperator.remove();
+        }
         newRow.remove();
     });
-
     conditionsContainer.appendChild(newRow);
-});
+}
 
 async function performCharitiesSearch() {
     const conditionsContainer = document.getElementById('conditionsContainer');
-    const logicalOperator = document.getElementById('logicalOperator').value;
     const messageElement = document.getElementById('searchMessage');
     const tableBody = document.getElementById('searchResultBody');
 
     const conditions = [];
-    const conditionRows = conditionsContainer.querySelectorAll('.condition-row');
+    const logicalOperators = [];
 
-    conditionRows.forEach(row => {
-        const attribute = row.querySelector('.attribute-select').value;
-        const operator = row.querySelector('.operator-select').value;
-        const value = row.querySelector('.value-input').value.trim();
+    const children = Array.from(conditionsContainer.children);
+    children.forEach((child, index) => {
+        if (child.classList.contains('condition-row')) {
+            const attribute = child.querySelector('.attribute-select').value;
+            const operator = child.querySelector('.operator-select').value;
+            const value = child.querySelector('.value-input').value.trim();
 
-        if (value) { //skip if value empty
-            conditions.push({ attribute, operator, value });
+            if (value) {
+                conditions.push({ attribute, operator, value });
+            }
+        } else if (child.classList.contains('logical-operator')) {
+            logicalOperators.push(child.textContent);
         }
     });
 
@@ -407,10 +429,7 @@ async function performCharitiesSearch() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                conditions,
-                logicalOperator
-            })
+            body: JSON.stringify({ conditions, logicalOperators })
         });
 
         if (!response.ok) {
@@ -427,27 +446,26 @@ async function performCharitiesSearch() {
             return;
         }
 
-       results.forEach(charity => {
-           const row = tableBody.insertRow();
+        results.forEach(charity => {
+            const row = tableBody.insertRow();
+            const idCell = row.insertCell(0);
+            const nameCell = row.insertCell(1);
+            const addressCell = row.insertCell(2);
 
-           const idCell = row.insertCell(0);
-           const nameCell = row.insertCell(1);
-           const addressCell = row.insertCell(2);
-
-           idCell.textContent = charity[0];
-           nameCell.textContent = charity[1];
-           addressCell.textContent = charity[2];
-       });
+            idCell.textContent = charity[0];
+            nameCell.textContent = charity[1];
+            addressCell.textContent = charity[2];
+        });
 
         messageElement.textContent = `Found ${results.length} charities matching the search criteria`;
         messageElement.style.color = 'green';
-
     } catch (error) {
         console.error('Search error:', error);
         messageElement.textContent = `Error: ${error.message}`;
         messageElement.style.color = 'red';
     }
 }
+
 
 async function runRecipientAgeCountQuery() {
     const messageElement = document.getElementById('ageCountQueryMessage');

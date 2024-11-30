@@ -137,15 +137,12 @@ router.get("/event-recipient-aggregation", async (req, res) => {
 router.post("/search-charities", async (req, res) => {
     try {
         console.log('Received data:', req.body);
-        const { conditions, logicalOperator } = req.body;
-        const results = await appService.searchCharities(conditions, logicalOperator);
+        const { conditions, logicalOperators } = req.body;
+        const results = await appService.searchCharities(conditions, logicalOperators);
         res.json(results);
     } catch (error) {
         console.error('Error in charity search:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

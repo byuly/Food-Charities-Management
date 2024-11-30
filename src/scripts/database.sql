@@ -6,12 +6,6 @@ CREATE TABLE Charities (
     UNIQUE (Address)
 );
 
--- AddressProvince table
-CREATE TABLE AddressProvince (
-    Address VARCHAR2(255) PRIMARY KEY,
-    Province VARCHAR2(50) NOT NULL
-);
-
 -- DonationEvent table
 CREATE TABLE DonationEvent (
     EventID INT PRIMARY KEY,
@@ -21,9 +15,6 @@ CREATE TABLE DonationEvent (
     EventDate DATE NOT NULL,
     FOREIGN KEY (CharityID)
     REFERENCES Charities(CharityID)
-    ON DELETE CASCADE,
-    FOREIGN KEY (Address)
-    REFERENCES AddressProvince(Address)
     ON DELETE CASCADE
 );
 
@@ -43,10 +34,7 @@ CREATE TABLE Recipients (
 -- ContactAddress table
 CREATE TABLE ContactAddress (
     ContactNum VARCHAR2(15) PRIMARY KEY,
-    Address VARCHAR2(255) NOT NULL,
-    FOREIGN KEY (Address)
-    REFERENCES AddressProvince(Address)
-    ON DELETE CASCADE
+    Address VARCHAR2(255) NOT NULL
 );
 
 -- Food table
@@ -93,6 +81,23 @@ CREATE TABLE Inventory (
     REFERENCES Food(FoodID)
     ON DELETE CASCADE
 );
+
+CREATE TABLE FoodItem (
+ ReceiptNum INT NOT NULL,
+ FoodID INT NOT NULL,
+ InventoryID INT NOT NULL,
+ CharityID INT NOT NULL,
+ ExpirationDate DATE NOT NULL,
+ Quantity INT NOT NULL,
+ Name VARCHAR(100) NOT NULL,
+ PRIMARY KEY (ReceiptNum, FoodID),
+ FOREIGN KEY (InventoryID, CharityID) REFERENCES Inventory(InventoryID, CharityID)
+ ON DELETE CASCADE,
+ FOREIGN KEY (CharityID) REFERENCES Charities(CharityID)
+ ON DELETE CASCADE,
+ FOREIGN KEY (FoodID) REFERENCES Food(FoodID)
+ ON DELETE CASCADE
+ );
 
 -- FoodDonors table
 CREATE TABLE FoodDonors (
@@ -185,13 +190,6 @@ INSERT INTO Charities (CharityID, Address, Name) VALUES (3, '789 Giving Rd', 'Ca
 INSERT INTO Charities (CharityID, Address, Name) VALUES (4, '101 Hope Blvd', 'Charity for Change');
 INSERT INTO Charities (CharityID, Address, Name) VALUES (5, '202 Compassion Ln', 'Goodwill');
 INSERT INTO Charities (CharityID, Address, Name) VALUES (6, '202 Poop Ln', 'Goodwill');
-
-INSERT INTO AddressProvince (Address, Province) VALUES ('123 Charity St', 'Ontario');
-INSERT INTO AddressProvince (Address, Province) VALUES ('456 Kindness Ave', 'British Columbia');
-INSERT INTO AddressProvince (Address, Province) VALUES ('789 Giving Rd', 'Alberta');
-INSERT INTO AddressProvince (Address, Province) VALUES ('101 Hope Blvd', 'Quebec');
-INSERT INTO AddressProvince (Address, Province) VALUES ('202 Compassion Ln', 'Manitoba');
-INSERT INTO AddressProvince (Address, Province) VALUES ('202 Poop Ln', 'Manitoba');
 
 INSERT INTO DonationEvent (EventID, CharityID, Address, EventName, EventDate) VALUES (1, 1, '123 Charity St', 'Holiday Food Drive', TO_DATE('2024-12-01', 'YYYY-MM-DD'));
 INSERT INTO DonationEvent (EventID, CharityID, Address, EventName, EventDate) VALUES (2, 2, '456 Kindness Ave', 'Summer BBQ', TO_DATE('2024-06-15', 'YYYY-MM-DD'));

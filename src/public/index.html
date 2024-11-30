@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="stylesheet" href="styles.css">
 <head>
     <meta charset="UTF-8">
     <!-- This meta tag ensures that the website renders correctly across different device sizes, enhancing mobile responsiveness. -->
@@ -175,7 +176,7 @@
         </tr>
         </thead>
         <tbody id="recipientsTableBody">
-        <!-- Results will be dynamically inserted here -->
+
         </tbody>
     </table>
 </div>
@@ -200,7 +201,7 @@
         </tr>
         </thead>
         <tbody id="aggregationResultBody">
-        <!-- Results will be dynamically inserted here -->
+
         </tbody>
     </table>
 </div>
@@ -208,41 +209,32 @@
 <div id="aggregationQueryMessage"></div>
 
 <br><hr><br>
-<h2>Charities SELECT</h2>
 
+<h2>Charities Search</h2>
 <div id="searchContainer">
     <div id="conditionsContainer">
-        <div class="condition-row">
+        <div class="condition-row" data-row-index="0">
             <select class="attribute-select">
                 <option value="CharityID">Charity ID</option>
                 <option value="Name">Name</option>
                 <option value="Address">Address</option>
             </select>
-
             <select class="operator-select">
                 <option value="=">=</option>
                 <option value=">">> </option>
                 <option value="<"> <</option>
                 <option value="!=">!=</option>
             </select>
-
             <input type="text" class="value-input" placeholder="Enter value">
-
             <button class="remove-condition" style="display:none;">-</button>
         </div>
     </div>
-
     <div class="search-controls">
-        <select id="logicalOperator">
-            <option value="AND">AND</option>
-            <option value="OR">OR</option>
-        </select>
-
-        <button id="addConditionBtn">Add Condition</button>
+        <button id="addAndConditionBtn">Add AND Clause</button>
+        <button id="addOrConditionBtn">Add OR Clause</button>
         <button id="searchBtn">Search</button>
     </div>
 </div>
-
 <div id="searchResultContainer">
     <table id="searchResultTable">
         <thead>
@@ -253,11 +245,9 @@
         </tr>
         </thead>
         <tbody id="searchResultBody">
-        <!-- Results will be dynamically inserted here -->
         </tbody>
     </table>
 </div>
-
 <div id="searchMessage"></div>
 
 <br><hr><br>
@@ -297,7 +287,7 @@
         </tr>
         </thead>
         <tbody id="lowestAgeEventBody">
-        <!-- Results will be dynamically inserted here -->
+
         </tbody>
     </table>
 </div>

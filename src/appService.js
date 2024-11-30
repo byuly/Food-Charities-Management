@@ -280,42 +280,48 @@ async function getEventRecipientAggregation() {
 }
 
 // SELECT!!!!!!!
-async function searchCharities(conditions, logicalOperator) {
+async function searchCharities(conditions, logicalOperators) {
     return await withOracleDB(async (connection) => {
         const whereClauses = [];
         const bindParams = {};
-
         conditions.forEach((condition, index) => {
             let paramName = `param${index}`;
-            let clause;
             switch(condition.operator) {
                 case '<':
                     clause = `${condition.attribute} < :${paramName}`;
-                    bindParams[paramName] = condition.value;
                     break;
                 case '>':
                     clause = `${condition.attribute} > :${paramName}`;
-                    bindParams[paramName] = condition.value;
                     break;
                 case '=':
                     clause = `${condition.attribute} = :${paramName}`;
-                    bindParams[paramName] = condition.value;
                     break;
                 case '!=':
                     clause = `${condition.attribute} != :${paramName}`;
-                    bindParams[paramName] = condition.value;
                     break;
                 default:
                     throw new Error(`Unsupported operator: ${condition.operator}`);
             }
+
+            // Bind parameter
+            bindParams[paramName] = condition.value;
             whereClauses.push(clause);
         });
 
-        const sqlQuery = `
-            SELECT CharityID, Name, Address
-            FROM Charities
-            ${whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(` ${logicalOperator} `) : ''}
-        `;
+        // Construct SQL query with custom logical operators
+        let sqlQuery = 'SELECT CharityID, Name, Address FROM Charities';
+
+        if (whereClauses.length > 0) {
+            sqlQuery += ' WHERE ';
+
+            // First condition
+            sqlQuery += whereClauses[0];
+
+            // Add subsequent conditions with their logical operators
+            for (let i = 1; i < whereClauses.length; i++) {
+                sqlQuery += ` ${logicalOperators[i-1]} ${whereClauses[i]}`;
+            }
+        }
 
         console.log('Executing SQL:', sqlQuery);
         console.log('Bind parameters:', bindParams);
@@ -325,6 +331,7 @@ async function searchCharities(conditions, logicalOperator) {
             bindParams,
             { outFormat: connection.OBJECT }
         );
+
         console.log(result.rows);
         return result.rows;
     });
