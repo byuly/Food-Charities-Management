@@ -3,31 +3,26 @@
 <link rel="stylesheet" href="styles.css">
 <head>
     <meta charset="UTF-8">
-    <!-- This meta tag ensures that the website renders correctly across different device sizes, enhancing mobile responsiveness. -->
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Link to the external CSS stylesheet. Uncomment if you wish to customize or add styling. -->
-    <!-- <link rel="stylesheet" href="styles.css">   -->
 
     <title>Database Application</title>
 </head>
 <body>
 <h1>Database Connection Status:
-    <!-- An in-line placeholder to display connection status. -->
+
     <span id="dbStatus"> </span>
-    <!-- A loading GIF, will be hided once get the status. -->
+
     <img id="loadingGif" class="loading-gif" src="loading_100px.gif" alt="Loading...">
 </h1>
 
-<br><hr><br> <!-- ========================================================================= -->
+<br><hr><br> 
 
-<!-- Show 'Demotable'.
-    Data will be fetched and inserted here dynamically using JavaScript. -->
 <h2>Show Tables</h2>
 <table id="demotable" border="1">
     <thead>
     <tr>
-        <!--Table head, need to be adjusted accordingly to align with your own.-->
         <th>CharityID</th>
         <th>Address</th>
         <th>Name</th>
@@ -43,7 +38,6 @@
 <h2>Reset Demotable</h2>
 <p>If you wish to reset the table press on the reset button. If this is the first time you're running this page, you MUST use reset</p>
 <button id="resetDemotable"> reset </button> <br>
-<!-- A placeholder to display messages related to the reset operation. -->
 <div id="resetResultMsg"></div>
 
 <br><hr><br> <!-- ========================================================================= -->
@@ -75,7 +69,6 @@
     </tbody>
 </table>
 
-<!--INSERT recipient with eventID 1-6, (other eventID does not exist)-->
 <h2>Insert Recipient</h2>
 <form id="insertRecipientForm">
     Sin Number: <input type="text" id="sinNumber" placeholder="Enter SIN (9 digits)" pattern="\d{9}" required> <br><br>
@@ -101,7 +94,6 @@
 <table id="recipientstable2" border="1">
     <thead>
     <tr>
-        <!--Table head, need to be adjusted accordingly to align with your own.-->
         <th>SinNum</th>
         <th>EventID</th>
         <th>Age</th>
@@ -338,7 +330,6 @@
 </table>
 
 <!-- ===================================================================================== -->
-<!-- External JavaScript file that contains the functionality/logic for the operations above. -->
 <script src="scripts.js"></script>
 </body>
 </html>
