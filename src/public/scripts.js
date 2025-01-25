@@ -127,7 +127,6 @@ async function countDemotable() {
 }
 
 
-// ---------------------------------------------------------------
 // Initializes the webpage functionalities.
 // Add or remove event listeners based on the desired functionalities.
 window.onload = function() {
@@ -151,7 +150,6 @@ window.onload = function() {
 };
 
 // General function to refresh the displayed table data.
-// You can invoke this after any table-modifying operation to keep consistency.
 function fetchTableData() {
     fetchAndDisplayUsers();
     fetchAndDisplayRecipients();
@@ -261,7 +259,7 @@ async function updateRecipients(event) {
     }
 }
 
-// JOIN!!!!
+// JOIN!!
 async function fetchFoodRecipients(event) {
     event.preventDefault();
 
